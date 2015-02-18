@@ -20,6 +20,7 @@ to repository pages of "Dynamo admin" http UI of ATG platform. (think *localhost
   * generate \<query-items\> script template for specified repository item 
   * generate \<add-item\> script template for specified repository item
   * generate \<remove-item\> script template for specified repository item
+  * generate \<print-item\> script template for the specified repository item
   * generate \<add-item\> script template for specified repository item - including \<set-property\> tags for (either just required or all) item's properties  
 
     > Because nobody really likes to type stuff like  \<query-items item-descriptor="category"\>ALL\</query-items\> over and over again.. 
