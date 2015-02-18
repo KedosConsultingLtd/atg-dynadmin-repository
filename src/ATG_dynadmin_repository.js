@@ -10,7 +10,7 @@
 // @match      http://*/dyn/admin/nucleus/atg/registry/ContentRepositories/*
 // @copyright  2013 Brdloush
 // @require       http://code.jquery.com/jquery-1.8.3.min.js
-// @require       http://yandex.st/highlightjs/7.3/highlight.min.js 
+// @require       http://cdnjs.cloudflare.com/ajax/libs/highlight.js/7.3/highlight.min.js 
 // @require       http://cdn.craig.is/js/mousetrap/mousetrap.min.js
 // @require       http://cdnjs.cloudflare.com/ajax/libs/codemirror/3.21.0/codemirror.js
 // @require       http://cdnjs.cloudflare.com/ajax/libs/codemirror/3.21.0/mode/xml/xml.js
@@ -20,6 +20,7 @@
 // @updateUrl     http://github.com/brdloush/atg-dynadmin-repository/blob/master/src/ATG_dynadmin_repository.js
 
 // ==/UserScript==
+// 0.3 - Added print button, fixed loading issue with CSS from SVN which didn't have the correct MIME type. Disabled some highlighting to prevent the browser from slowing with large result sets.
 // 0.21 - fixed query buttons click handling: if you clicked the icon part of the button, the item-descriptor was "undefined" in generated query
 // 0.20 - ALL (0-50) button modified to "Last 50" (order by id desc, limit 50)
 // 0.19 - item descriptors in table are now being sorted by item descriptor name
@@ -63,7 +64,7 @@ function performPageLoadInitialization() {
     // import highlight.js CSS 
     useCSS('http://yandex.st/highlightjs/7.3/styles/github.min.css');
     useCSS('http://cdnjs.cloudflare.com/ajax/libs/codemirror/3.20.0/codemirror.css')
-    useCSS('https://simplemodal.googlecode.com/svn-history/r257/trunk/simplemodal/demo/css/basic.css')
+    useCSS('http://www.chriskellet.com/basic.css')
     useCSS('http://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css')
 }
 
@@ -256,6 +257,18 @@ function applyQueryTemplate(itemDescriptorName, rangeString, focusOnTextElement)
         $('form').submit();
         return;
     }    
+    if (focusOnTextElement) {
+        document.location.href="#querytextelementjump";
+    }
+}
+
+function applyPrintTemplate(itemDescriptorName, focusOnTextElement) {
+    debugger;
+    var textelement = $('textarea[name=xmltext]');
+    textelement.attr('value', '<print-item item-descriptor="'+itemDescriptorName+'" id="" />');
+    textelement.attr('id', 'querytextelement');
+    synchronizeEditor();
+  
     if (focusOnTextElement) {
         document.location.href="#querytextelementjump";
     }
@@ -482,10 +495,11 @@ thElemsWithRepositoryItemNames.each(function(index, element)  {
     var itemDescriptorName = $(element).text();
     $(element).attr('item-descriptor', itemDescriptorName); // add an attribute for simple lookup
     var queryALL = $('<a name="queryAllButton" itemDescriptorName="'+itemDescriptorName+'"><button title="CLICK: generate QUERY-ITEM template,\nSHIFT-CLICK: generate&execute template" style="background-color: #99DD99;"><i class="fa fa-search"/> ALL</button></a>');
+    var print = $('<a name="printButton" itemDescriptorName="'+itemDescriptorName+'"><button title="CLICK: generate PRINT-ITEM template" style="background-color: #99DD99;">PRINT</button></a>');
     var queryTop50 = $('<a name="queryTop50Button" itemDescriptorName="'+itemDescriptorName+'"><button title="CLICK: generate QUERY-ITEM template,\nSHIFT-CLICK: generate&execute template"  style="background-color: #99DD99;"><i class="fa fa-search"/> Last 50</button></a>');
     var removeItemButton = $('<a name="removeItemButton" itemDescriptorName="'+itemDescriptorName+'"><button title="CLICK: generate REMOVE template"  style="background-color: #EEAAAA;"><i class="fa fa-times"/></button></a>');
     var addItemButton = $('<a name="addItemButton" itemDescriptorName="'+itemDescriptorName+'"><button  title="CLICK: generate template with required properties only,\nSHIFT-CLICK: generate template with all properties" style="background-color: #99DD99;"><i style="height:100%;" class="fa fa-plus"/></button></a>');
-    $(element).append(queryALL,queryTop50,removeItemButton,addItemButton);
+    $(element).append(queryALL,queryTop50,removeItemButton,addItemButton,print);
 });
 
 // add behaviors to new item-descriptor buttons
@@ -493,6 +507,12 @@ $('a[name=queryAllButton]').click(function(event) {
     var linkThatWasClicked = $(event.target).parents("a");
     var itemDescriptorName = linkThatWasClicked.attr('itemDescriptorName');
     applyQueryTemplate(itemDescriptorName,"", true);
+});
+
+$('a[name=printButton]').click(function(event) {
+    var linkThatWasClicked = $(event.target).parents("a");
+    var itemDescriptorName = linkThatWasClicked.attr('itemDescriptorName');
+    applyPrintTemplate(itemDescriptorName, true);
 });
 
 $('a[name=queryTop50Button]').click(function(event) {
@@ -551,7 +571,7 @@ $(document).keypress(function(e) {
 
 // colorize xml output and XML repository definition 
 $('pre code').each(function(i, e) {hljs.highlightBlock(e)});
-$('td:contains("XML value")').parent().find('pre').each(function(i, e) {hljs.highlightBlock(e)});
+// commented out highlighting //$('td:contains("XML value")').parent().find('pre').each(function(i, e) {hljs.highlightBlock(e)});
 
 // 
 $('textarea').css('width', '100%');
@@ -577,6 +597,9 @@ function synchronizeEditor() {
 }
 
 function makeAddItemRefsClickable() {
+    
+    return;
+    
     // make <add-item> references to other repository items clickable 
     var allSetPropertyTags = $('span.title:contains("set-property")');
     allSetPropertyTags.each(function (i, node) {
@@ -695,4 +718,3 @@ if (typeof openItem !== 'undefined' && openItem !== 'null') {
     
     applyQueryOneTemplate(itemDescName, itemId);
 }
-
