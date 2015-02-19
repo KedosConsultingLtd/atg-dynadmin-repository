@@ -9,7 +9,7 @@
 // @include      http://*/dyn/admin/nucleus/*PriceLists*
 // @include      http://*/dyn/admin/nucleus/atg/registry/ContentRepositories/*
 // @copyright  2013 Brdloush
-// @require       http://code.jquery.com/jquery-1.8.3.min.js
+// @require       https://code.jquery.com/jquery-2.1.3.min.js
 // @require       http://cdnjs.cloudflare.com/ajax/libs/highlight.js/7.3/highlight.min.js 
 // @require       http://cdn.craig.is/js/mousetrap/mousetrap.min.js
 // @require       http://cdnjs.cloudflare.com/ajax/libs/codemirror/3.21.0/codemirror.js
@@ -17,9 +17,10 @@
 // @require       http://cdn.jsdelivr.net/simplemodal/1.4.4/jquery.simplemodal.min.js
 // @require       http://cdnjs.cloudflare.com/ajax/libs/Chart.js/0.2.0/Chart.min.js
 // @grant    GM_addStyle
-// @updateUrl     http://github.com/brdloush/atg-dynadmin-repository/blob/master/src/ATG_dynadmin_repository.js
+// @updateUrl     https://raw.githubusercontent.com/KedosConsultingLtd/atg-dynadmin-repository/master/src/ATG_dynadmin_repository.js
 
 // ==/UserScript==
+// 0.31 - Performance increase by caching the item-descriptor name when creating the links to the properties. Changed the link to use the OOTB atg display of elements.
 // 0.3 - Added print button, fixed loading issue with CSS from SVN which didn't have the correct MIME type. Disabled some highlighting to prevent the browser from slowing with large result sets.
 // 0.21 - fixed query buttons click handling: if you clicked the icon part of the button, the item-descriptor was "undefined" in generated query
 // 0.20 - ALL (0-50) button modified to "Last 50" (order by id desc, limit 50)
@@ -598,21 +599,33 @@ function synchronizeEditor() {
 
 function makeAddItemRefsClickable() {
     
-    return;
     
     // make <add-item> references to other repository items clickable 
-    var allSetPropertyTags = $('span.title:contains("set-property")');
+    var allSetPropertyTags = $('.xml span.title:contains("set-property")');
+    
+    console.log("number of tags: " + allSetPropertyTags.size());
+    var savedItemDescName;
+    
     allSetPropertyTags.each(function (i, node) {
         
-        var propertyNameNode = $(node).next().next(); 
+        var propertyNameNode = $(node).next().next();
+        
         var propertyName = propertyNameNode.text();
-        propertyName=propertyName.substring(1);
-        propertyName=propertyName.substring(0,propertyName.length-1);
-        if (propertyName.trim().length > 0) {        
+
+        var itemDescName;
+        
+        propertyName=propertyName.substring(1,propertyName.length-1).trim();
+        if (propertyName.length > 0) {        
+            if(savedItemDescName) {
+                itemDescName = savedItemDescName;
+            } else {
+                var itemDescNameNode = propertyNameNode.parent().prevAll('span:contains("add-item"):first').find('span.value:first');
+                itemDescName = itemDescNameNode.text();
+                itemDescName=itemDescName.substring(1,itemDescName.length-1);
+                savedItemDescName = itemDescName;
+            }
+
             
-            var itemDescNameNode = propertyNameNode.parent().prevAll('span:contains("add-item"):first').find('span.value:first');
-            var itemDescName = itemDescNameNode.text().substring(1);
-            itemDescName=itemDescName.substring(0,itemDescName.length-1);
             var valueNode = propertyNameNode.parent().next();      
             var value=valueNode.text();
             
@@ -628,7 +641,8 @@ function makeAddItemRefsClickable() {
                 for (i=0;i<tokens.length;i++)  {
                     var token = tokens[i];
                     var itemType = itemTypes[propKey];
-                    var url = '/dyn/admin/nucleus'+repositoryName+"?openItem="+itemType+"->"+token;
+                    var url = '/dyn/admin/nucleus'+repositoryName+"?action=seeitems&itemdesc="+itemType+"&itemid="+token;
+                    
                     if (i>0) {
                         $("<span>,</span>").appendTo(newElements);
                     }
