@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name       ATG_dynadmin_repository
 // @namespace  http://github.com/brdloush/atg-dynadmin-repository/
-// @version    0.32
+// @version    0.33
 
 // @description  Script that adds useful new buttons to ATG dyn/admin/nucleus UI + provides XML colorization to results of repository queries.  
 // @include      http://*/dyn/admin/nucleus/*Repository*
@@ -21,6 +21,7 @@
 // @updateUrl     http://raw.githubusercontent.com/KedosConsultingLtd/atg-dynadmin-repository/master/src/ATG_dynadmin_repository.js
 // @downloadURL   https://raw.githubusercontent.com/KedosConsultingLtd/atg-dynadmin-repository/master/src/ATG_dynadmin_repository.js
 // ==/UserScript==
+// 0.33 - Fixed update URL
 // 0.32 - Beautify the XML returned when viewing the template definition
 // 0.31 - Performance increase by caching the item-descriptor name when creating the links to the properties. Changed the link to use the OOTB atg display of elements.
 // 0.3 - Added print button, fixed loading issue with CSS from SVN which didn't have the correct MIME type. Disabled some highlighting to prevent the browser from slowing with large result sets.
