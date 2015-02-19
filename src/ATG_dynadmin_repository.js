@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name       ATG_dynadmin_repository
 // @namespace  http://github.com/brdloush/atg-dynadmin-repository/
-// @version    0.31
+// @version    0.32
 
 // @description  Script that adds useful new buttons to ATG dyn/admin/nucleus UI + provides XML colorization to results of repository queries.  
 // @include      http://*/dyn/admin/nucleus/*Repository*
@@ -16,10 +16,12 @@
 // @require       http://cdnjs.cloudflare.com/ajax/libs/codemirror/3.21.0/mode/xml/xml.js
 // @require       http://cdn.jsdelivr.net/simplemodal/1.4.4/jquery.simplemodal.min.js
 // @require       http://cdnjs.cloudflare.com/ajax/libs/Chart.js/0.2.0/Chart.min.js
+// @require       https://raw.githubusercontent.com/vkiryukhin/vkBeautify/master/vkbeautify.js
 // @grant    GM_addStyle
 // @updateUrl     https://raw.githubusercontent.com/KedosConsultingLtd/atg-dynadmin-repository/master/src/ATG_dynadmin_repository.js
 
 // ==/UserScript==
+// 0.32 - Beautify the XML returned when viewing the template definition
 // 0.31 - Performance increase by caching the item-descriptor name when creating the links to the properties. Changed the link to use the OOTB atg display of elements.
 // 0.3 - Added print button, fixed loading issue with CSS from SVN which didn't have the correct MIME type. Disabled some highlighting to prevent the browser from slowing with large result sets.
 // 0.21 - fixed query buttons click handling: if you clicked the icon part of the button, the item-descriptor was "undefined" in generated query
@@ -572,7 +574,10 @@ $(document).keypress(function(e) {
 
 // colorize xml output and XML repository definition 
 $('pre code').each(function(i, e) {hljs.highlightBlock(e)});
-$('td:contains("XML value")').parent().find('pre').each(function(i, e) {hljs.highlightBlock(e)});
+$('td:contains("XML value")').parent().find('pre').each(function(i, e) {
+    $(e).text(vkbeautify.xml($(e).text()));
+    hljs.highlightBlock(e);
+});
 
 // 
 $('textarea').css('width', '100%');
