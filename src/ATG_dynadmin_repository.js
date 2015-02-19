@@ -18,8 +18,8 @@
 // @require       http://cdnjs.cloudflare.com/ajax/libs/Chart.js/0.2.0/Chart.min.js
 // @require       https://raw.githubusercontent.com/vkiryukhin/vkBeautify/master/vkbeautify.js
 // @grant    GM_addStyle
-// @updateUrl     https://raw.githubusercontent.com/KedosConsultingLtd/atg-dynadmin-repository/master/src/ATG_dynadmin_repository.js
-
+// @updateUrl     http://raw.githubusercontent.com/KedosConsultingLtd/atg-dynadmin-repository/master/src/ATG_dynadmin_repository.js
+// @downloadURL   https://raw.githubusercontent.com/KedosConsultingLtd/atg-dynadmin-repository/master/src/ATG_dynadmin_repository.js
 // ==/UserScript==
 // 0.32 - Beautify the XML returned when viewing the template definition
 // 0.31 - Performance increase by caching the item-descriptor name when creating the links to the properties. Changed the link to use the OOTB atg display of elements.
