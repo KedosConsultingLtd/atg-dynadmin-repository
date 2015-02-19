@@ -4,10 +4,10 @@
 // @version    0.21
 
 // @description  Script that adds useful new buttons to ATG dyn/admin/nucleus UI + provides XML colorization to results of repository queries.  
-// @match      http://*/dyn/admin/nucleus/*Repository*
-// @match      http://*/dyn/admin/nucleus/*ProductCatalog*
-// @match      http://*/dyn/admin/nucleus/*PriceLists*
-// @match      http://*/dyn/admin/nucleus/atg/registry/ContentRepositories/*
+// @include      http://*/dyn/admin/nucleus/*Repository*
+// @include      http://*/dyn/admin/nucleus/*ProductCatalog*
+// @include      http://*/dyn/admin/nucleus/*PriceLists*
+// @include      http://*/dyn/admin/nucleus/atg/registry/ContentRepositories/*
 // @copyright  2013 Brdloush
 // @require       http://code.jquery.com/jquery-1.8.3.min.js
 // @require       http://cdnjs.cloudflare.com/ajax/libs/highlight.js/7.3/highlight.min.js 
@@ -571,7 +571,7 @@ $(document).keypress(function(e) {
 
 // colorize xml output and XML repository definition 
 $('pre code').each(function(i, e) {hljs.highlightBlock(e)});
-// commented out highlighting //$('td:contains("XML value")').parent().find('pre').each(function(i, e) {hljs.highlightBlock(e)});
+$('td:contains("XML value")').parent().find('pre').each(function(i, e) {hljs.highlightBlock(e)});
 
 // 
 $('textarea').css('width', '100%');
