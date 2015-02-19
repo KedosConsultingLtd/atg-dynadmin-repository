@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name       ATG_dynadmin_repository
 // @namespace  http://github.com/brdloush/atg-dynadmin-repository/
-// @version    0.35
+// @version    0.4
 
 // @description  Script that adds useful new buttons to ATG dyn/admin/nucleus UI + provides XML colorization to results of repository queries.  
 // @include      http://*/dyn/admin/nucleus/*Repository*
@@ -15,13 +15,15 @@
 // @require       http://cdnjs.cloudflare.com/ajax/libs/codemirror/3.21.0/codemirror.js
 // @require       http://cdnjs.cloudflare.com/ajax/libs/codemirror/3.21.0/mode/xml/xml.js
 // @require       http://cdn.jsdelivr.net/simplemodal/1.4.4/jquery.simplemodal.min.js
-// @require       https://cdnjs.cloudflare.com/ajax/libs/Chart.js/1.0.1/Chart.min.js
+// @require       http://code.highcharts.com/highcharts.js
+// @require       http://code.highcharts.com/modules/exporting.js
 // @require       https://raw.githubusercontent.com/vkiryukhin/vkBeautify/master/vkbeautify.js
 // @grant    GM_addStyle
 // @updateUrl     http://raw.githubusercontent.com/KedosConsultingLtd/atg-dynadmin-repository/master/src/ATG_dynadmin_repository.js
 // @downloadURL   https://raw.githubusercontent.com/KedosConsultingLtd/atg-dynadmin-repository/master/src/ATG_dynadmin_repository.js
 // ==/UserScript==
-// 0.35 - switched to use the old approach for viewing sub-elements
+// 0.4 - New Graphing Library - old one wasn't working in Firefox for some reason.
+// 0.35 - switched to use the old approach for viewing sub-elements - charts still broken at the moment.
 // 0.34 - Jump to the results when clicking on a link
 // 0.33 - Fixed update URL
 // 0.32 - Beautify the XML returned when viewing the template definition
@@ -674,95 +676,92 @@ addTableInfo();
 var statRows=$('th:contains("weakEntries")').parent().parent().find('tr');
 var itemDescTRs = statRows.find('td[colspan=18]:contains("item-descriptor=")').parent();
 
-var itemLabels = [];
 var itemMiss = [];
 var queryMiss = [];
 itemDescTRs.each(function (i, elem) {
     var idName = $(elem).text().replace('item-descriptor=', '');
     idName = idName.substring(0, idName.indexOf('cache-mode'));
-    console.log(idName);
     var itemCacheRow = $(elem).next();
     var queryCacheRow = $(elem).next().next();
     var a=0;
-    itemLabels.push(idName);
     var itemMissCnt = itemCacheRow.find('td:nth-child(8)').text();
     
 
     var queryMissCnt = queryCacheRow.find('td:nth-child(8)').text();
     
-    itemMiss.push(itemMissCnt > 0 ? itemMissCnt : 0);
-    queryMiss.push(queryMissCnt > 0 ? queryMissCnt : 0);
+    itemMiss.push(itemMissCnt > 0 ? [idName,parseFloat(itemMissCnt)] : [idName, 0]);
+    
+    queryMiss.push(queryMissCnt > 0 ? [idName,parseFloat(queryMissCnt)] : [idName, 0]);
 }); 
 //[1]).parent().next().next()
 
 console.log("ItemMiss" + itemMiss);
 console.log("QueryMiss" + queryMiss);
 
-$('<h1 name="charts">charts</h1>').appendTo($('body'));
+$('<h1 name="charts">Cache Miss Charts</h1>').appendTo($('body'));
 
-var canvasWidth2 = 100+(itemLabels.length*70);
-var canvasWidth = 400;
-var chart = $('<canvas id="chart" width="'+canvasWidth+'" height="400"></canvas>');
+console.log(itemMiss);
+
+var chart = $('<div id="container" style="min-width: 310px; height: 400px; margin: 0 auto"></div>');
 chart.appendTo($('body'));
-var ctx = chart.get(0).getContext("2d");
 
 
-Chart.defaults.global.responsive = true;
 
-var data2 = {
-    labels: itemLabels,
-    datasets: [
-        {
-            label: "Item Cache Misses",
-            fillColor: "rgba(220,220,220,0.5)",
-            strokeColor: "rgba(220,220,220,0.8)",
-            highlightFill: "rgba(220,220,220,0.75)",
-            highlightStroke: "rgba(220,220,220,1)",
+$(function () {
+    $('#container').highcharts({
+        chart: {
+            type: 'column'
+        },
+        title: {
+            text: 'Cache Misses'
+        },
+        xAxis: {
+            type: 'category',
+            labels: {
+                rotation: -45,
+                style: {
+                    fontSize: '13px',
+                    fontFamily: 'Verdana, sans-serif'
+                }
+            }
+        },
+        plotOptions: {
+            bar: {
+                dataLabels: {
+                    enabled: true
+                }
+            }
+        },
+        yAxis: {
+            min: 0,
+            title: {
+                text: 'Number of misses'
+            }
+        },
+         legend: {
+            layout: 'vertical',
+            align: 'right',
+            verticalAlign: 'top',
+            x: -40,
+            y: 100,
+            floating: true,
+            borderWidth: 1,
+            backgroundColor: ((Highcharts.theme && Highcharts.theme.legendBackgroundColor) || '#FFFFFF'),
+            shadow: true
+        },
+        tooltip: {
+            valueSuffix: ' misses'
+        },
+        series: [{
+            name: 'Item Cache Miss',
             data: itemMiss
         },
-        {
-            label: "Query Cache Misses",
-            fillColor: "rgba(151,187,205,0.5)",
-            strokeColor: "rgba(151,187,205,0.8)",
-            highlightFill: "rgba(151,187,205,0.75)",
-            highlightStroke: "rgba(151,187,205,1)",
+               {
+            name: 'Query Cache Miss',
             data: queryMiss
-        }
-    ]
-};
-
-
-var data = {
-    labels: ["January", "February", "March", "April", "May", "June", "July"],
-    datasets: [
-        {
-            label: "My First dataset",
-            fillColor: "rgba(220,220,220,0.5)",
-            strokeColor: "rgba(220,220,220,0.8)",
-            highlightFill: "rgba(220,220,220,0.75)",
-            highlightStroke: "rgba(220,220,220,1)",
-            data: [65, 59, 80, 81, 56, 55, 40]
-        },
-        {
-            label: "My Second dataset",
-            fillColor: "rgba(151,187,205,0.5)",
-            strokeColor: "rgba(151,187,205,0.8)",
-            highlightFill: "rgba(151,187,205,0.75)",
-            highlightStroke: "rgba(151,187,205,1)",
-            data: [28, 48, 40, 19, 86, 27, 90]
-        }
-    ]
-};
-
-
-
-$( document ).ready( function() {
-    console.log("Drawing with ctx: " + ctx);
-
-    var myNewChart = new Chart(ctx).Bar(data,{});    
-    console.log("Done");
-
-} );
+        } ]
+    });
+});
 
 
 
